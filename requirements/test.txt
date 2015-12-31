@@ -1,0 +1,3 @@
+-r prod.txt
+mock==1.3.0
+tox==2.3.0

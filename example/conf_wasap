@@ -1,0 +1,15 @@
+############# Yowsup Configuration Sample ###########
+#
+# ====================
+# The file contains info about your WhatsApp account. This is used during registration and login.
+# You can define or override all fields in the command line args as well.
+#
+#
+# Your full phone number including the country code you defined in 'cc', without preceding '+' or '00'
+phone=34658463741
+#
+# You obtain this password when you register using Yowsup.
+# Help here: https://github.com/tgalal/yowsup/wiki/yowsup-cli-2.0#yowsup-cli-registration
+password=eq5rapFxTSyAceSYHZ7btgb0ono=
+#######################################################
+

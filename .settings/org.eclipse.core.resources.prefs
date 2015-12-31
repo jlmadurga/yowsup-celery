@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+encoding//tests/__init__.py=utf-8
+encoding//tests/test_bootsteps.py=utf-8
+encoding//tests/test_layer.py=utf-8
+encoding//tests/test_stack.py=utf-8
+encoding//tests/test_tasks.py=utf-8
+encoding//tests/utils.py=utf-8
+encoding//yowsup_celery/__init__.py=utf-8
+encoding//yowsup_celery/exceptions.py=utf-8
+encoding//yowsup_celery/layer.py=utf-8
+encoding/setup.py=utf-8
