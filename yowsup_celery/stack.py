@@ -34,21 +34,9 @@ class YowsupStack(stacks.YowStack):
         and Yowsup Core Layers  
         """
         top_layers = (CeleryLayer,) + top_layers if top_layers else (CeleryLayer,)
-        if encryption:
-            from yowsup.layers.axolotl import YowAxolotlLayer
-            layers = (
-                top_layers +
-                (stacks.YOWSUP_PROTOCOL_LAYERS_FULL,) +
-                (YowAxolotlLayer,) + 
-                stacks.YOWSUP_CORE_LAYERS
-            )
-        else:
-            layers = (
-                top_layers +
-                stacks.YOWSUP_FULL_STACK 
-            )
+        layers = stacks.YowStackBuilder.getDefaultLayers(axolotl=encryption) + top_layers
         try:
-            super(YowsupStack, self).__init__(layers)
+            super(YowsupStack, self).__init__(layers, reversed=False)
         except ValueError as e:
             raise exceptions.ConfigurationError(e.args[0])
         self.setCredentials(credentials)
