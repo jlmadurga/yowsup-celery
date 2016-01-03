@@ -3,13 +3,20 @@ from yowsup.layers.interface import YowInterfaceLayer, ProtocolEntityCallback
 from yowsup.layers import EventCallback
 from yowsup.layers.protocol_messages.protocolentities import \
     TextMessageProtocolEntity
+from yowsup.layers.protocol_media.protocolentities import RequestUploadIqProtocolEntity
+from yowsup.layers.protocol_media.protocolentities.message_media_downloadable_image import \
+    ImageDownloadableMediaMessageProtocolEntity
+from yowsup.layers.protocol_media.protocolentities.message_media_downloadable_audio import \
+    AudioDownloadableMediaMessageProtocolEntity
 import logging
 from yowsup.layers.network import YowNetworkLayer
 from yowsup.layers import YowLayerEvent
 from functools import wraps
 import sys
+import os
 from yowsup_celery.layer_interface import CeleryLayerInterface
 from yowsup_celery.exceptions import ConnectionError
+from yowsup.layers.protocol_media.mediauploader import MediaUploader
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +47,14 @@ class CeleryLayer(YowInterfaceLayer):
             return "%s@g.us" % number
 
         return "%s@s.whatsapp.net" % number
+    
+    def do_send_image(self, file_path, url, to, ip=None, caption=None):
+        entity = ImageDownloadableMediaMessageProtocolEntity.fromFilePath(file_path, url, ip, to, caption=caption)
+        self.toLower(entity)
+
+    def do_send_audio(self, file_path, url, to, ip=None, caption=None):
+        entity = AudioDownloadableMediaMessageProtocolEntity.fromFilePath(file_path, url, ip, to)
+        self.toLower(entity)
         
     @ProtocolEntityCallback("success")
     def on_success(self, success_protocol_entity):
@@ -93,6 +108,33 @@ class CeleryLayer(YowInterfaceLayer):
         """
         logger.info("On disconnected")
         self.connected = False
+        
+    def on_request_upload_result(self, jid, path, result_request_upload_iq_protocol_entity, 
+                                 request_upload_iq_protocol_entity, caption=None):
+
+        if request_upload_iq_protocol_entity.mediaType == RequestUploadIqProtocolEntity.MEDIA_TYPE_AUDIO:
+            do_send_fn = self.do_send_audio
+        else:
+            do_send_fn = self.do_send_image
+
+        if result_request_upload_iq_protocol_entity.isDuplicate():
+            do_send_fn(path, result_request_upload_iq_protocol_entity.getUrl(), jid,
+                       result_request_upload_iq_protocol_entity.getIp(), caption)
+        else:
+            success_fn = lambda filePath, jid, url: do_send_fn(filePath, url, jid, 
+                                                               result_request_upload_iq_protocol_entity.getIp(), 
+                                                               caption)
+            mediaUploader = MediaUploader(jid, self.getOwnJid(), path,
+                                          result_request_upload_iq_protocol_entity.getUrl(),
+                                          result_request_upload_iq_protocol_entity.getResumeOffset(),
+                                          success_fn, self.on_upload_error, self.on_upload_progress, async=True)
+            mediaUploader.start()
+            
+    def on_upload_error(self, file_path, jid, url):
+        logger.error("Upload file %s to %s for %s failed!" % (file_path, url, jid))
+
+    def on_upload_progress(self, file_path, jid, url, progress):
+        logger.info("%s => %s, %d%% \r" % (os.path.basename(file_path), jid, progress))
     
     @connection_required
     def send_message(self, number, content):
@@ -117,3 +159,30 @@ class CeleryLayer(YowInterfaceLayer):
     def disconnect(self):
         self.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_DISCONNECT))
         return True
+    
+    def _send_media_path(self, number, path, type, caption=None):
+        jid = self.normalize_jid(number)
+        entity = RequestUploadIqProtocolEntity(type, filePath=path)
+        success_fn = lambda success_entity, original_entity: self.on_request_upload_result(jid, path, success_entity, 
+                                                                                           original_entity, caption)
+        error_fn = lambda error_entity, original_entity: self.on_request_upload_error(jid, path, error_entity, 
+                                                                                      original_entity)
+        self._sendIq(entity, success_fn, error_fn)
+
+    @connection_required
+    def send_image(self, number, path, caption=None):
+        """
+        Send image
+        :param str number: phone number with cc (country code)
+        :param str path: image file path
+        """
+        return self._send_media_path(number, path, RequestUploadIqProtocolEntity.MEDIA_TYPE_IMAGE, caption)
+        
+    @connection_required
+    def send_audio(self, number, path):
+        """
+        Send audio
+        :param str number: phone number with cc (country code)
+        :param str path: audio file path
+        """
+        return self._send_media_path(number, path, RequestUploadIqProtocolEntity.MEDIA_TYPE_AUDIO)

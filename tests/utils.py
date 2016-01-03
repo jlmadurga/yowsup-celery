@@ -6,6 +6,12 @@ from yowsup.layers.protocol_acks.protocolentities.test_ack_incoming import entit
 from yowsup.layers.protocol_acks.protocolentities import IncomingAckProtocolEntity
 from yowsup.layers.protocol_messages.protocolentities import TextMessageProtocolEntity
 from yowsup.layers.protocol_receipts.protocolentities import IncomingReceiptProtocolEntity
+from yowsup.layers.protocol_media.protocolentities.message_media_downloadable_image \
+    import DownloadableMediaMessageProtocolEntity
+from yowsup.layers.protocol_media.protocolentities.message_media_downloadable_image \
+    import ImageDownloadableMediaMessageProtocolEntity
+from yowsup.layers.protocol_media.protocolentities.message_media_downloadable_audio import \
+    AudioDownloadableMediaMessageProtocolEntity
 import time
 
 
@@ -52,3 +58,38 @@ def receipt_incoming_protocol_entity():
         "timestamp": int(time.time())
     }
     return IncomingReceiptProtocolEntity(**attributes)
+
+def image_downloadable_media_message_protocol_entity(url="url", to="341234567", ip="ip", caption="image caption"):
+    attributes = {
+        "mimeType": DownloadableMediaMessageProtocolEntity.MEDIA_TYPE_IMAGE,
+        "fileHash": "filehash",
+        "url": url,
+        "ip": ip,
+        "size": "1234",
+        "fileName": "image.jpg",
+        "encoding": "encoding",
+        "width": "123",
+        "height": "123",
+        "caption": caption,
+        "to": to
+    }
+    return ImageDownloadableMediaMessageProtocolEntity(**attributes)
+
+def audio_downloadable_media_message_protocol_entity(url="url", to="341234567", ip="ip", caption="image caption"):
+    attributes = {
+        "mimeType": DownloadableMediaMessageProtocolEntity.MEDIA_TYPE_AUDIO,
+        "fileHash": "filehash",
+        "url": url,
+        "ip": ip,
+        "size": "1234",
+        "fileName": "audio.mp3",
+        "abitrate": "arbitrate",
+        "acodec": "acodec",
+        "asampfreq": "asampfreq",
+        "duration": "10",
+        "origin": "origin",
+        "seconds": "100",        
+        "encoding": "encoding",
+        "to": to
+    }
+    return AudioDownloadableMediaMessageProtocolEntity(**attributes)

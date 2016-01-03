@@ -7,15 +7,29 @@ from yowsup.layers.protocol_messages.protocolentities import TextMessageProtocol
 from yowsup.layers.protocol_receipts.protocolentities import IncomingReceiptProtocolEntity
 import time
 from yowsup_celery.exceptions import ConnectionError
-from tests.utils import success_protocol_entity, failure_protocol_entity
+from tests.utils import success_protocol_entity, failure_protocol_entity, image_downloadable_media_message_protocol_entity, \
+    audio_downloadable_media_message_protocol_entity
 from yowsup.layers import YowLayerEvent
 from yowsup.layers.network import YowNetworkLayer
 import unittest
+from yowsup.layers.protocol_media.protocolentities.message_media_downloadable import \
+    DownloadableMediaMessageProtocolEntity
 try:
     from unittest import mock
 except ImportError:
     import mock  # noqa
     
+def init_request_upload(self, mediaType, filePath):
+    self.tag = "iq"
+    self._id = "id_iq"
+    self._from = None
+    self._type = "set"
+    self.xmlns = "w:m"
+    self.to = "s.whatsapp.net"
+    self.mediaType = mediaType
+    self.b64Hash = "hash"
+    self.size = int("1234")
+    self.origHash = "orighash"
 
 class CeleryLayerTest(YowProtocolLayerTest, CeleryLayer):
     
@@ -89,7 +103,50 @@ class CeleryLayerTest(YowProtocolLayerTest, CeleryLayer):
         self.connected = True
         self.onEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_DISCONNECTED))
         self.assertFalse(self.connected)
-        
+
+    def _test_send_media_to_upload(self, fn, *args, **kwargs):
+        with mock.patch('yowsup.layers.protocol_media.protocolentities.iq_requestupload.RequestUploadIqProtocolEntity.__init__',  # noqa
+                        init_request_upload):  
+            fn(*args, **kwargs)
+            entity_iq = self.lowerSink.pop()
+            iq_entity_registered, iq_on_success, iq_on_error = self.iqRegistry[entity_iq.getId()]
+            self.assertEqual(entity_iq.getId(), iq_entity_registered.getId())
+            self.assertEqual(entity_iq.getType(), iq_entity_registered.getType())            
+    
+    def test_send_image_to_upload(self):
+        self._test_send_media_to_upload(self.send_image, "341234567", "path/image.jpg", "image caption")
+                                       
+    def test_send_audio_to_upload(self):
+        self._test_send_media_to_upload(self.send_audio, "341234567", "path/audio.mp3")
+
+    def test_send_image_to_do(self):
+        path = "file_path/image.jpg"
+        url = "image_url"
+        to = "3412345670"
+        ip = "192.12.1.1"
+        caption = "caption"
+        with mock.patch('yowsup.layers.protocol_media.protocolentities.message_media_downloadable_image.ImageDownloadableMediaMessageProtocolEntity.fromFilePath') as mock_image:  # noqa
+            mock_image.return_value = image_downloadable_media_message_protocol_entity(url, to, ip, caption)
+            self.do_send_image(path, url, to, ip, caption)
+            entity = self.lowerSink.pop()
+            self.assertEqual(entity.caption, caption)
+            self.assertEqual(entity.to, to)
+            self.assertEqual(entity.url, url)
+            self.assertEqual(entity.getMediaType(), DownloadableMediaMessageProtocolEntity.MEDIA_TYPE_IMAGE)
+            
+    def test_send_audio_to_do(self):
+        path = "file_path/audio.mp3"
+        url = "audio_url"
+        to = "3412345670"
+        ip = "192.12.1.1"     
+        with mock.patch('yowsup.layers.protocol_media.protocolentities.message_media_downloadable_audio.AudioDownloadableMediaMessageProtocolEntity.fromFilePath') as mock_audio:  # noqa
+            mock_audio.return_value = audio_downloadable_media_message_protocol_entity(url, to, ip)
+            self.do_send_audio(path, url, to, ip)
+            entity = self.lowerSink.pop()
+            self.assertEqual(entity.to, to)
+            self.assertEqual(entity.url, url)
+            self.assertEqual(entity.getMediaType(), DownloadableMediaMessageProtocolEntity.MEDIA_TYPE_AUDIO)
+
 if __name__ == '__main__':
     import sys
     sys.exit(unittest.main())

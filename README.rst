@@ -45,6 +45,6 @@ Features
  
 * Yowsup features included:
  	* Connect/Disconnect
- 	* Send Text Messages
+ 	* Send Text, Image and Audio Messages
  	* Receive Messages, Acks and Receipts
 
