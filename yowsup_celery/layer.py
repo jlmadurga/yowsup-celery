@@ -8,6 +8,8 @@ from yowsup.layers.protocol_media.protocolentities.message_media_downloadable_im
     ImageDownloadableMediaMessageProtocolEntity
 from yowsup.layers.protocol_media.protocolentities.message_media_downloadable_audio import \
     AudioDownloadableMediaMessageProtocolEntity
+from yowsup.layers.protocol_media.protocolentities.message_media_location import LocationMediaMessageProtocolEntity
+from yowsup.layers.protocol_media.protocolentities.message_media_vcard import VCardMediaMessageProtocolEntity
 import logging
 from yowsup.layers.network import YowNetworkLayer
 from yowsup.layers import YowLayerEvent
@@ -172,7 +174,7 @@ class CeleryLayer(YowInterfaceLayer):
     @connection_required
     def send_image(self, number, path, caption=None):
         """
-        Send image
+        Send image message
         :param str number: phone number with cc (country code)
         :param str path: image file path
         """
@@ -181,8 +183,43 @@ class CeleryLayer(YowInterfaceLayer):
     @connection_required
     def send_audio(self, number, path):
         """
-        Send audio
+        Send audio message
         :param str number: phone number with cc (country code)
         :param str path: audio file path
         """
         return self._send_media_path(number, path, RequestUploadIqProtocolEntity.MEDIA_TYPE_AUDIO)
+    
+    
+    @connection_required
+    def send_location(self, number, name, url, latitude, longitude):
+        """
+        Send location message
+        :param str number: phone number with cc (country code)
+        :param str name: indentifier for the location
+        :param str url: location url
+        :param str longitude: location longitude
+        :param str latitude: location latitude 
+        """
+        location_message = LocationMediaMessageProtocolEntity(latitude, longitude, name, url, encoding="raw", 
+                                                              to=self.normalize_jid(number))
+        self.toLower(location_message)
+        return location_message
+    
+    @connection_required
+    def send_vcard(self, number, name, data):
+        """
+        Send location message
+        :param str number: phone number with cc (country code)
+        :param str name: indentifier for the location
+        :param str data: vcard format i.e.
+        BEGIN:VCARD
+        VERSION:3.0
+        N:;Home;;;
+        FN:Home
+        item1.TEL:+34 911234567
+        item1.X-ABLabel:Home
+        END:VCARD
+        """
+        vcard_message = VCardMediaMessageProtocolEntity(name, data, to=self.normalize_jid(number))
+        self.toLower(vcard_message)
+        return vcard_message

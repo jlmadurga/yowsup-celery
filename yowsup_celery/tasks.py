@@ -63,6 +63,19 @@ def send_audio(self, number, path):
     self.facade.send_audio(number, path)
     return True
 
+@shared_task(base=YowsupTask, bind=True)
+@listening_required
+def send_location(self, number, name, url, latitude, longitude):
+    self.facade.send_location(number, name, url, latitude, longitude)
+    return True
+
+@shared_task(base=YowsupTask, bind=True)
+@listening_required
+def send_vcard(self, number, name, data):
+    self.facade.send_vcard(number, name, data)
+    return True
+
+
 
 
 

@@ -17,6 +17,12 @@ class CeleryLayerInterface(YowLayerInterface):
     
     def send_audio(self, number, path):
         return self._layer.send_audio(number, path)
+    
+    def send_location(self, number, name, url, latitude, longitude):
+        return self._layer.send_location(number, name, url, latitude, longitude)
+    
+    def send_vcard(self, number, name, data):
+        return self._layer.send_vcard(number, name, data)
 
     def connected(self):
         return self._layer.connected
