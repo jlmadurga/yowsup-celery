@@ -189,7 +189,6 @@ class CeleryLayer(YowInterfaceLayer):
         """
         return self._send_media_path(number, path, RequestUploadIqProtocolEntity.MEDIA_TYPE_AUDIO)
     
-    
     @connection_required
     def send_location(self, number, name, url, latitude, longitude):
         """

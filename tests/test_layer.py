@@ -149,12 +149,12 @@ class CeleryLayerTest(YowProtocolLayerTest, CeleryLayer):
             
     def test_send_location(self):
         params = {
-                  "number": "341234567",
-                  "name": "Cerro espino",
-                  "url": "https://foursquare.com/v/4ca5ffa797c8a1cd9edc6ba5",
-                  "latitude": "40.458197101060826",
-                  "longitude": "-3.8601064682006836"
-                  }
+            "number": "341234567",
+            "name": "Cerro espino",
+            "url": "https://foursquare.com/v/4ca5ffa797c8a1cd9edc6ba5",
+            "latitude": "40.458197101060826",
+            "longitude": "-3.8601064682006836"
+        }
         location_message = self.send_location(**params)
         out_msg = self.lowerSink.pop()
         self.assertEqual(location_message.getId(), out_msg.getId())
@@ -166,11 +166,11 @@ class CeleryLayerTest(YowProtocolLayerTest, CeleryLayer):
         
     def test_send_vcard(self):
         params = {
-                  "number": "341234567", 
-                  "name": "Grandma",
-                  "data": """BEGIN:VCARD\nVERSION:3.0\nN:;Grandma;;;N:;Grandma;;;\nFN:Grandma\n
-                  item1.TEL:+34 1234567\nitem1.X-ABLabel:Home\nEND:VCARD\n"""
-                  }
+            "number": "341234567", 
+            "name": "Grandma",
+            "data": """BEGIN:VCARD\nVERSION:3.0\nN:;Grandma;;;N:;Grandma;;;\nFN:Grandma\n
+                item1.TEL:+34 1234567\nitem1.X-ABLabel:Home\nEND:VCARD\n"""
+        }
         vcard_message = self.send_vcard(**params)
         out_msg = self.lowerSink.pop()
         self.assertEqual(vcard_message.getId(), out_msg.getId())

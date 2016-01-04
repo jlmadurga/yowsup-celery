@@ -74,8 +74,3 @@ def send_location(self, number, name, url, latitude, longitude):
 def send_vcard(self, number, name, data):
     self.facade.send_vcard(number, name, data)
     return True
-
-
-
-
-
