@@ -52,11 +52,17 @@ def send_message(self, number, content):
     return True
 
 @shared_task(base=YowsupTask, bind=True)
+@listening_required
 def send_image(self, number, path):
     self.facade.send_image(number, path)
     return True
 
 @shared_task(base=YowsupTask, bind=True)
+@listening_required
 def send_audio(self, number, path):
     self.facade.send_audio(number, path)
     return True
+
+
+
+
