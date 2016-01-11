@@ -33,7 +33,7 @@ class YowsupStack(stacks.YowStack):
         :params top_layers: tuple of layer between :class:`yowsup_gateway.layer.CeleryLayer` 
         and Yowsup Core Layers  
         """
-        top_layers = (CeleryLayer,) + top_layers if top_layers else (CeleryLayer,)
+        top_layers = top_layers + (CeleryLayer,) if top_layers else (CeleryLayer,)
         layers = stacks.YowStackBuilder.getDefaultLayers(axolotl=encryption) + top_layers
         try:
             super(YowsupStack, self).__init__(layers, reversed=False)
