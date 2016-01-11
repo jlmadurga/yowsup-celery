@@ -51,7 +51,7 @@ class YowsupStack(stacks.YowStack):
         self.listening = False
         self.detached_queue = Queue.Queue()
 
-    def asynloop(self, timeout=10, detached_delay=0.2):
+    def asynloop(self, auto_connect=False, timeout=10, detached_delay=0.2):
         """
         Non-blocking event loop consuming messages until connection is lost,
            or shutdown is requested.
@@ -59,6 +59,8 @@ class YowsupStack(stacks.YowStack):
         :param float detached_delay: float secs to sleep when exiting asyncore loop and execution detached queue
             callbacks
         """
+        if auto_connect:
+            self.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_CONNECT))
         try:
             self.listening = True
             start = int(time.time())

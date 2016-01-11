@@ -145,16 +145,22 @@ class StackTest(unittest.TestCase):
         if fn:
             fn(*args, **kwargs)
         
-    def _asynloop(self, asyn_action, timeout=0.1):
+    def _asynloop(self, asyn_action, timeout=0.1, auto_connect=False):
         self.input_thread = threading.Thread(target=self._queue_thread, args=(asyn_action,))
         self.input_thread.daemon = True
         self.input_thread.start()
-        self.stack.asynloop(timeout)
+        self.stack.asynloop(timeout=timeout, auto_connect=auto_connect)
         self.assertFalse(self.stack.listening, False)
         self.assertTrue(self.stack.detached_queue.empty())
         
     def test_asynloop_timeout(self):
-        self._asynloop(None, 0.1)        
+        self._asynloop(None, 0.1)     
+        
+    def test_asynloop_autoconnect(self):
+        def check_connected():
+            self.assertTrue(self.stack.facade.connected())
+        self._asynloop(check_connected, auto_connect=True) 
+        
         
     def _test_asynloop(self, action):
         def queue_to_loop():
@@ -199,3 +205,4 @@ class StackTest(unittest.TestCase):
             msg_sent = self.mock_layer.lowerSink.pop()
             self.assertEqual(msg_to_send.getId(), msg_sent.getId())
             self.assertEqual(msg_to_send.getBody(), msg_sent.getBody())
+        self._test_asynloop(send_message)
