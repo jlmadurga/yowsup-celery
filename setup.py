@@ -28,7 +28,7 @@ test_requirements = requirements + [
 
 setup(
     name='yowsup-celery',
-    version='0.1.2',
+    version='0.1.3',
     description="Yowsup integrated in a celery architecture",
     long_description=readme + '\n\n' + history,
     author="Juan Madurga",
