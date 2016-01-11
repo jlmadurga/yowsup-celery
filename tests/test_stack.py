@@ -161,7 +161,6 @@ class StackTest(unittest.TestCase):
             self.assertTrue(self.stack.facade.connected())
         self._asynloop(check_connected, auto_connect=True) 
         
-        
     def _test_asynloop(self, action):
         def queue_to_loop():
             self.assertTrue(self.stack.listening)
