@@ -7,8 +7,8 @@ from yowsup.layers.protocol_messages.protocolentities import TextMessageProtocol
 from yowsup.layers.protocol_receipts.protocolentities import IncomingReceiptProtocolEntity
 import time
 from yowsup_celery.exceptions import ConnectionError
-from tests.utils import success_protocol_entity, failure_protocol_entity, image_downloadable_media_message_protocol_entity, \
-    audio_downloadable_media_message_protocol_entity
+from tests.utils import success_protocol_entity, failure_protocol_entity, \
+    image_downloadable_media_message_protocol_entity, audio_downloadable_media_message_protocol_entity
 from yowsup.layers import YowLayerEvent
 from yowsup.layers.network import YowNetworkLayer
 import unittest
