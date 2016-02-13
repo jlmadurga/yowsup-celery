@@ -37,7 +37,7 @@ Just call tasks as other celery app::
 	from yowsup_celery import tasks
 
 	tasks.connect.delay()
-	tasks.send_message("341234567", "New message sent")
+	tasks.send_message.delay("341234567", "New message sent")
 	taks.disconnect.delay()
 	
 You can have a multiple workers for different phone numbers routing each worker to its queue::
