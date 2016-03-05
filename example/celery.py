@@ -25,6 +25,7 @@ app = YowCelery('example',
              include=['yowsup_celery.tasks'])
 
 # Feel free to add other layers 
-# app.conf.update(
-#     TOP_LAYERS=('yowsup_ext.layers.store.layer.YowStorageLayer',)          
+#app.conf.update(
+#     TOP_LAYERS=('yowsup_ext.layers.store.layer.YowStorageLayer',)  
+#    YOWSUPCONFIG='example/conf_wasap'        
 #     )

@@ -34,16 +34,19 @@ class YowsupStep(bootsteps.StartStopStep):
             logger.error("Invalid config path: %s" % config)
             raise ConfigurationError("Invalid config path: %s" % config)
     
-    def _get_credentials(self, login, config):
+    def _get_credentials(self, login, config, worker):
         if login:
             return tuple(login.split(":"))
-        elif config:
-            config_credentials = self._get_config(config)
-            if "password" not in config_credentials or "phone" not in config_credentials:
-                raise ConfigurationError("Must specify at least phone number and password in config file")
-            return config_credentials["phone"], config_credentials["password"]
         else:
-            return None
+            if not config:
+                config = worker.app.conf.table().get('YOWSUPCONFIG', None)
+            if config:
+                config_credentials = self._get_config(config)
+                if "password" not in config_credentials or "phone" not in config_credentials:
+                    raise ConfigurationError("Must specify at least phone number and password in config file")
+                return config_credentials["phone"], config_credentials["password"]
+            else:
+                return None
         
     def __init__(self, worker, login, config, unmoxie, **kwargs):
         """
@@ -52,7 +55,7 @@ class YowsupStep(bootsteps.StartStopStep):
         :param config: optional path to configuration file
         :param unmoxie: boolean to disable encryption
         """
-        credentials = self._get_credentials(login, config)
+        credentials = self._get_credentials(login, config, worker)
         if not credentials:
             raise ConfigurationError("Error: You must specify a configuration method")
         worker.app.stack = YowsupStack(credentials, not unmoxie, self._get_top_layers(worker))
