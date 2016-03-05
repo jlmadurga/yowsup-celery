@@ -50,6 +50,14 @@ class TestYowsupStep(unittest.TestCase):
         
     def test_init_no_configuration_method(self):
         self.assertRaises(ConfigurationError, YowsupStep, self.worker, None, None, True)
+    
+    def test_init_conf_file_only_in_configuration(self):
+        with mock.patch('six.moves.builtins.open', mock.mock_open(read_data='adasdasd')) as m:
+            handle = m.return_value.__enter__.return_value
+            handle.__iter__.return_value = iter(["####confifle\n", "phone=341111111\n", "password=asdasdasdasd\n"])
+            self.worker.app.conf.table = mock.MagicMock(return_value={'YOWSUPCONFIG': 'file_path'})
+            YowsupStep(self.worker, None, None, True)
+            self.assertStackIntiliazed(self.worker.app.stack)
         
     def test_init_top_layer_not_interface_layer(self):
         self.worker.app.conf.table = mock.MagicMock(return_value={'TOP_LAYERS': ('yowsup.stacks.yowstack.YowStack',)})
