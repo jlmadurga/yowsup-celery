@@ -47,4 +47,10 @@ You can have a multiple workers for different phone numbers routing each worker 
 When calling tasks queue to the queue desired::
 
 	taks.connect.apply_async(queue="number1")	
+	
+If you want to use celery as daemon just add yowconfig path in configuration::
+
+	app.conf.update(
+	   YOWSUPCONFIG='path/to/yowsupconfig/file'          
+     )
 
